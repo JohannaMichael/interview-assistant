@@ -1,3 +1,6 @@
+import config from './config.js';
+
+const API_BASE_URL = config.API_BASE_URL;
 const userForm = document.getElementById('userForm');
 const interviewSection = document.getElementById('interviewSection');
 const startBtn = document.getElementById('startBtn');
@@ -18,6 +21,7 @@ const recognition = new SpeechRecognition();
 const speechRecognitionList = new SpeechGrammarList();
 
 let threadId = null;
+let file = null;
 let isRecording = false;
 
 recognition.grammars = speechRecognitionList;
@@ -33,7 +37,7 @@ userForm.addEventListener('submit', (event) => {
     interviewSection.style.display = 'block'; 
 
     //create new thread 
-    fetch('http://localhost:8000/thread')
+    fetch(`${API_BASE_URL}/thread`)
         .then(response => response.json())
         .then(data => {
             threadId = data;
@@ -43,20 +47,11 @@ userForm.addEventListener('submit', (event) => {
             interviewSection.style.display = 'block'; 
     });
 
-    //upload file to openai
+    //upload file to openai, use file var
 
 
     //upload function to openai 
 });
-        
-// onload change to form submit
-/*window.onload = function() {
-    fetch('http://localhost:8000/thread')
-        .then(response => response.json())
-        .then(data => {
-            threadId = data;
-        });
-}*/
 
 
 // Start recording
@@ -101,7 +96,7 @@ async function sendMessage(message) {
     const file_id = "";
 
     console.log(JSON.stringify({ message, threadId, file_id }))
-    const response = await fetch('http://localhost:8000/message', {
+    const response = await fetch(`${API_BASE_URL}/message`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -118,7 +113,7 @@ async function sendMessage(message) {
 }
 
 function speak(message) {
-    if (synthesis) {
+    if (synthesis) { //TODO different speech synthesis, from openai?
         const utterance = new SpeechSynthesisUtterance(message);
         synthesis.speak(utterance);
     }
@@ -132,13 +127,22 @@ endBtn.onclick = function() {
 };
 
 fileUpload.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        fileName.textContent = file.name;
-        const reader = new FileReader();
-        reader.readAsText(file);
+    const eventFile = event.target.files[0];
+    if (eventFile) {
+        fileName.textContent = eventFile.name;
+        file = eventFile;
+    } else {
+        fileName.textContent = "No file selected";
     }
 });
+
+function showLoading() {
+    loadingOverlay.style.display = 'flex';
+}
+
+function hideLoading() {
+    loadingOverlay.style.display = 'none';
+}
 
 // Add some visual feedback when recording
 /*function pulseAnimation() {

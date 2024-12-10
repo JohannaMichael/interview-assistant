@@ -13,16 +13,14 @@ import io
 load_dotenv("../.env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
-
-#UPLOAD_DIR = Path("uploads")
-#UPLOAD_DIR.mkdir(exist_ok=True)
+FRONTEND_DEV_URL = os.getenv("FRONTEND_DEV_URL")
 
 # Initialize FastAPI
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://127.0.0.1:5500"],  # Specify the frontend URL
+    allow_origins=[FRONTEND_DEV_URL],  # Specify the frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers

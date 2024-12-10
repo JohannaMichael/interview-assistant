@@ -33,7 +33,7 @@ openai = AsyncOpenAI(api_key=OPENAI_API_KEY)
 class MessageRequest(BaseModel):
     threadId: str
     message: str
-    file_id: Optional[str] = None
+    fileId: Optional[str] = None
 
 # Helper function to create a new thread
 async def create_thread():
@@ -108,8 +108,10 @@ async def upload_file_to_openai(file: UploadFile):
 @app.get("/thread")
 async def thread_route():
     # Endpoint to create a new thread
-    thread = await create_thread()
-    return thread.id
+    threadId = await create_thread()
+    return {
+        "threadId": threadId.id
+    }
 
 @app.post("/message")
 async def message_route(request: MessageRequest, background_tasks: BackgroundTasks):
@@ -119,7 +121,7 @@ async def message_route(request: MessageRequest, background_tasks: BackgroundTas
     """
     thread_id = request.threadId
     message = request.message
-    file_id = request.file_id
+    file_id = request.fileId
 
     if not thread_id or not message:
         raise HTTPException(status_code=400, detail="Invalid input")

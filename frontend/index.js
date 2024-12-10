@@ -1,6 +1,6 @@
 import config from './config.js';
 
-const API_BASE_URL = config.API_BASE_URL;
+const API_DEV_URL = config.API_DEV_URL;
 const userForm = document.getElementById('userForm');
 const interviewSection = document.getElementById('interviewSection');
 const startBtn = document.getElementById('startBtn');
@@ -22,6 +22,7 @@ const speechRecognitionList = new SpeechGrammarList();
 
 let threadId = null;
 let file = null;
+let fileId = null;
 let isRecording = false;
 
 recognition.grammars = speechRecognitionList;
@@ -30,27 +31,69 @@ recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
 
-userForm.addEventListener('submit', (event) => {
+userForm.addEventListener('submit', async (event) => {
     event.preventDefault();
     showLoading();
     userForm.style.display = 'none';
     interviewSection.style.display = 'block'; 
+    let initMessage = ""
+    const userName = document.getElementById('userName').value;
 
     //create new thread 
-    fetch(`${API_BASE_URL}/thread`)
-        .then(response => response.json())
-        .then(data => {
-            threadId = data;
-            //TODO: place this after uploading function
-            hideLoading();
-            userForm.style.display = 'none';
-            interviewSection.style.display = 'block'; 
-    });
+    try {
+        // Fetch the thread data
+        const response = await fetch(`${API_DEV_URL}/thread`);
+        
+        if (!response.ok) {
+            throw new Error(`Failed to fetch thread: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        threadId = data.threadId
+
+        initMessage = `Hi, my name is ${userName} and you need to conduct a job interview with me now.`;
+
+    } catch (error) {
+        console.error('Error fetching thread:', error);
+    }
 
     //upload file to openai, use file var
+    if (file) {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch(`${API_DEV_URL}/upload-file`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            const data = await response.json();
+            fileId = data.file_id //TODO: Refactor to one or the other fileId or file_id
+
+            if (response.ok) {
+                console.log('File uploaded successfully:');
+            } else {
+                console.error('Error uploading file:');
+            }
+        } catch (err) {
+            console.error('Network error:', err);
+        }
+
+        initMessage = initMessage.concat("Understand my uploaded resume and use it as a reference.")
+        console.log(initMessage)
+    }
 
 
-    //upload function to openai 
+    await sendMessage(initMessage, threadId, fileId);
+    hideLoading();
+    userForm.style.display = 'none';
+    interviewSection.style.display = 'block';
+
+    
+
+
+    //TODO: upload function to openai 
 });
 
 
@@ -91,17 +134,15 @@ if ('speechSynthesis' in window) {
         console.log('Text-to-speech not supported.');
 }
 
-async function sendMessage(message) {
+async function sendMessage(message, threadId, fileId) {
 
-    const file_id = "";
-
-    console.log(JSON.stringify({ message, threadId, file_id }))
-    const response = await fetch(`${API_BASE_URL}/message`, {
+    console.log(JSON.stringify({ message, threadId, fileId }))
+    const response = await fetch(`${API_DEV_URL}/message`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ message, threadId, file_id })
+        body: JSON.stringify({ message, threadId, fileId })
     });
 
     const data = await response.json();

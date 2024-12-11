@@ -1,6 +1,6 @@
 import config from './config.js';
 
-const API_DEV_URL = config.API_DEV_URL;
+const API_BASE_URL = config.API_BASE_URL;
 const userForm = document.getElementById('userForm');
 const interviewSection = document.getElementById('interviewSection');
 const startBtn = document.getElementById('startBtn');
@@ -23,7 +23,6 @@ const speechRecognitionList = new SpeechGrammarList();
 let threadId = null;
 let file = null;
 let fileId = null;
-let isRecording = false;
 
 recognition.grammars = speechRecognitionList;
 recognition.continuous = true;
@@ -42,7 +41,7 @@ userForm.addEventListener('submit', async (event) => {
     //create new thread 
     try {
         // Fetch the thread data
-        const response = await fetch(`${API_DEV_URL}/thread`);
+        const response = await fetch(`${API_BASE_URL}/thread`);
         
         if (!response.ok) {
             throw new Error(`Failed to fetch thread: ${response.statusText}`);
@@ -63,7 +62,7 @@ userForm.addEventListener('submit', async (event) => {
         formData.append('file', file);
 
         try {
-            const response = await fetch(`${API_DEV_URL}/upload-file`, {
+            const response = await fetch(`${API_BASE_URL}/upload-file`, {
                 method: 'POST',
                 body: formData,
             });
@@ -85,10 +84,7 @@ userForm.addEventListener('submit', async (event) => {
     }
 
 
-    await sendMessage(initMessage, threadId, fileId);
-    hideLoading();
-    userForm.style.display = 'none';
-    interviewSection.style.display = 'block';
+    await sendMessage(initMessage);
 
     
 
@@ -99,30 +95,29 @@ userForm.addEventListener('submit', async (event) => {
 
 // Start recording
 startBtn.onclick = function() {
-    isRecording = true;
     recognition.start();
 }
 
 // Stop recording
 stopBtn.onclick = function() {
-    isRecording = false;
+    console.log("Here")
     recognition.stop();
-    console.log('Stopped recording.');
 }
 
 // Output
 recognition.onresult = async function(event) {
     // Get the latest transcript 
-    const result = event.results[event.resultIndex][0].transcript;
-    transcript.value += `${result}\n`;
+    const lastItem = event.results[event.results.length - 1];
+    const result = lastItem[0].transcript;
 
-    isRecording = false;
-    recognition.stop();
-    await sendMessage(result);
+    if (result != "") {
+        transcript.value = `${result}\n\n` + transcript.value;
+        recognition.stop();
+        await sendMessage(result);
+    }
 }
 
 recognition.onspeechend = function() {
-    isRecording = false;
     recognition.stop();
 }
 
@@ -134,10 +129,13 @@ if ('speechSynthesis' in window) {
         console.log('Text-to-speech not supported.');
 }
 
-async function sendMessage(message, threadId, fileId) {
+async function sendMessage(message) {
+    showLoading();
+    userForm.style.display = 'none';
+    interviewSection.style.display = 'block'; 
 
     console.log(JSON.stringify({ message, threadId, fileId }))
-    const response = await fetch(`${API_DEV_URL}/message`, {
+    const response = await fetch(`${API_BASE_URL}/message`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -145,23 +143,52 @@ async function sendMessage(message, threadId, fileId) {
         body: JSON.stringify({ message, threadId, fileId })
     });
 
-    const data = await response.json();
+    hideLoading();
+    userForm.style.display = 'none';
+    interviewSection.style.display = 'block';
 
-    // TODO: catch 400 bad request 
-    transcript.value += `${data.response}\n`;
-
-    speak(data.response);
-}
-
-function speak(message) {
-    if (synthesis) { //TODO different speech synthesis, from openai?
-        const utterance = new SpeechSynthesisUtterance(message);
-        synthesis.speak(utterance);
+    if (!response.ok) {
+        transcript.value = `Oops! There seems to have gone something wrong! Could not connect to your assistant\n\n` + transcript.value;
+    } else {
+        const result = await response.json();
+        transcript.value = `${result.response}\n\n` + transcript.value;
+        await handleSpeechAndRecognition(result.response);
     }
 }
 
+function speak(message) {
+    if (synthesis && message) { //TODO different speech synthesis
+
+        return new Promise((resolve) => {
+            const utterance = new SpeechSynthesisUtterance(message);
+    
+            // Event triggered when speech synthesis is finished
+            utterance.onend = () => {
+                console.log("Speech synthesis finished");
+                resolve(); // Resolve the promise
+            };
+    
+            // Handle any potential errors
+            utterance.onerror = (event) => {
+                console.error("Speech synthesis error:", event.error);
+                resolve(); // Still resolve to prevent blocking
+            };
+    
+            synthesis.speak(utterance);
+        });
+    }
+}
+
+async function handleSpeechAndRecognition(message) {
+
+    // Perform speech synthesis and wait for it to finish
+    await speak(message);
+
+    // Start recognition after speech synthesis
+    recognition.start();
+}
+
 endBtn.onclick = function() {
-    console.log("Here")
     if (confirm('Are you sure you want to end the interview?')) {
         window.location.reload();
     }

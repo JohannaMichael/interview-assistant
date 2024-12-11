@@ -8,19 +8,20 @@ from pydantic import BaseModel
 from typing import Optional
 from openai import AsyncOpenAI
 import io
+from elevenlabs import ElevenLabs
 
 # Load environment variables
 load_dotenv("../.env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
-FRONTEND_DEV_URL = os.getenv("FRONTEND_DEV_URL")
+FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 
 # Initialize FastAPI
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[FRONTEND_DEV_URL],  # Specify the frontend URL
+    allow_origins=[FRONTEND_BASE_URL],  # Specify the frontend URL
     allow_credentials=True,
     allow_methods=["*"],  # Allow all HTTP methods
     allow_headers=["*"],  # Allow all headers
@@ -163,4 +164,7 @@ async def upload_file(file: UploadFile = File(...)):
         return {"file_id": file_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+
 

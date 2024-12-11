@@ -41,7 +41,7 @@ userForm.addEventListener('submit', async (event) => {
     //create new thread 
     try {
         // Fetch the thread data
-        const response = await fetch(`${API_BASE_URL}/thread`);
+        const response = await fetch(`${API_BASE_URL}/openai/thread`);
         
         if (!response.ok) {
             throw new Error(`Failed to fetch thread: ${response.statusText}`);
@@ -62,7 +62,7 @@ userForm.addEventListener('submit', async (event) => {
         formData.append('file', file);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/upload-file`, {
+            const response = await fetch(`${API_BASE_URL}/openai/upload-file`, {
                 method: 'POST',
                 body: formData,
             });
@@ -80,16 +80,10 @@ userForm.addEventListener('submit', async (event) => {
         }
 
         initMessage = initMessage.concat("Understand my uploaded resume and use it as a reference.")
-        console.log(initMessage)
     }
-
+    //TODO: job description to openai 
 
     await sendMessage(initMessage);
-
-    
-
-
-    //TODO: upload function to openai 
 });
 
 
@@ -100,7 +94,6 @@ startBtn.onclick = function() {
 
 // Stop recording
 stopBtn.onclick = function() {
-    console.log("Here")
     recognition.stop();
 }
 
@@ -135,7 +128,7 @@ async function sendMessage(message) {
     interviewSection.style.display = 'block'; 
 
     console.log(JSON.stringify({ message, threadId, fileId }))
-    const response = await fetch(`${API_BASE_URL}/message`, {
+    const response = await fetch(`${API_BASE_URL}/openai/message`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

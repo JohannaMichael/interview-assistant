@@ -5,13 +5,13 @@ from services.openai_service import (
     add_message,
     run_assistant,
     check_status,
-    upload_file_to_openai
+    upload_file_to_assistant
 )
 from services.file_service import validate_file
 
-openai_router = APIRouter()
+assistant_router = APIRouter()
 
-@openai_router.get("/thread")
+@assistant_router.get("/thread")
 async def thread_route():
     # Endpoint to create a new thread
     threadId = await create_thread()
@@ -19,7 +19,7 @@ async def thread_route():
         "threadId": threadId.id
     }
 
-@openai_router.post("/message")
+@assistant_router.post("/message")
 async def message_route(request: MessageRequest, background_tasks: BackgroundTasks):
     """
     Endpoint to add a message to a thread and run the assistant.
@@ -52,7 +52,7 @@ async def message_route(request: MessageRequest, background_tasks: BackgroundTas
         "response": response,
     }
 
-@openai_router.post("/upload-file")
+@assistant_router.post("/upload-file")
 async def upload_file(file: UploadFile = File(...)):
     """
     Endpoint to upload a PDF file.
@@ -60,7 +60,7 @@ async def upload_file(file: UploadFile = File(...)):
     validate_file(file)
 
     try:
-        file_id = await upload_file_to_openai(file)
+        file_id = await upload_file_to_assistant(file)
         return {"file_id": file_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

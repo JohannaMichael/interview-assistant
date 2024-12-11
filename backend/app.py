@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes.openai_routes import openai_router
+from routes.assistant_routes import assistant_router
 
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 
@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],  # Allow all headers
 )
 
-app.include_router(openai_router, prefix="/openai")
+app.include_router(assistant_router, prefix="/assistant")
 
 
 

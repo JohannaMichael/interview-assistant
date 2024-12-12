@@ -41,7 +41,7 @@ userForm.addEventListener('submit', async (event) => {
     //create new thread 
     try {
         // Fetch the thread data
-        const response = await fetch(`${API_BASE_URL}/openai/thread`);
+        const response = await fetch(`${API_BASE_URL}/assistant/thread`);
         
         if (!response.ok) {
             throw new Error(`Failed to fetch thread: ${response.statusText}`);
@@ -62,7 +62,7 @@ userForm.addEventListener('submit', async (event) => {
         formData.append('file', file);
 
         try {
-            const response = await fetch(`${API_BASE_URL}/openai/upload-file`, {
+            const response = await fetch(`${API_BASE_URL}/assistant/upload-file`, {
                 method: 'POST',
                 body: formData,
             });
@@ -128,7 +128,7 @@ async function sendMessage(message) {
     interviewSection.style.display = 'block'; 
 
     console.log(JSON.stringify({ message, threadId, fileId }))
-    const response = await fetch(`${API_BASE_URL}/openai/message`, {
+    const response = await fetch(`${API_BASE_URL}/assistant/message`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -148,7 +148,7 @@ async function sendMessage(message) {
         await handleSpeechAndRecognition(result.response);
     }
 }
-
+/*
 function speak(message) {
     if (synthesis && message) { //TODO different speech synthesis
 
@@ -170,12 +170,26 @@ function speak(message) {
             synthesis.speak(utterance);
         });
     }
+} */
+
+async function playAndWaitForAudio(audioUrl) {
+    return new Promise((resolve) => {
+        const audio = new Audio(audioUrl);
+
+        // Resolve the promise when the audio finishes playing
+        audio.onended = () => {
+            resolve();
+        };
+
+        // Start playing the audio
+        audio.play();
+    });
 }
 
 async function handleSpeechAndRecognition(message) {
 
     // Perform speech synthesis and wait for it to finish
-    await speak(message);
+    await synthesizeAndPlayAudio(message);
 
     // Start recognition after speech synthesis
     recognition.start();
@@ -205,15 +219,33 @@ function hideLoading() {
     loadingOverlay.style.display = 'none';
 }
 
-// Add some visual feedback when recording
-/*function pulseAnimation() {
-    if (isRecording) {
-        startBtn.style.transform = 'scale(1.05)';
-        setTimeout(() => {
-            startBtn.style.transform = 'scale(1)';
-        }, 200);
+
+async function synthesizeAndPlayAudio(text) {
+
+    try {
+        // Send the text to the backend
+        const response = await fetch(`${API_BASE_URL}/synthesis/text-to-speech`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text, voice_id: "" }),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to fetch audio from the backend");
+        }
+
+        // Convert the audio stream to a Blob
+        const audioBlob = await response.blob();
+
+        // Create a URL for the audio Blob
+        const audioUrl = URL.createObjectURL(audioBlob);
+
+        await playAndWaitForAudio(audioUrl);
+
+    } catch (error) {
+        console.error("Error during synthesis or playback:", error);
     }
-    requestAnimationFrame(pulseAnimation);
 }
 
-pulseAnimation(); */

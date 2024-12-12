@@ -5,7 +5,7 @@ from services.openai_service import (
     add_message,
     run_assistant,
     check_status,
-    upload_file_to_assistant
+    upload_file_to_openai
 )
 from services.file_service import validate_file
 
@@ -60,7 +60,7 @@ async def upload_file(file: UploadFile = File(...)):
     validate_file(file)
 
     try:
-        file_id = await upload_file_to_assistant(file)
+        file_id = await upload_file_to_openai(file)
         return {"file_id": file_id}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

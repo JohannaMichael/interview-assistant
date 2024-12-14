@@ -1,4 +1,5 @@
 import config from './config.js';
+import message from './const.js';
 
 const API_BASE_URL = config.API_BASE_URL;
 const userForm = document.getElementById('userForm');
@@ -6,11 +7,14 @@ const interviewSection = document.getElementById('interviewSection');
 const startBtn = document.getElementById('startBtn');
 const stopBtn = document.getElementById('stopBtn');
 const endBtn = document.getElementById('endBtn');
+const generateBtn = document.getElementById('generateReportBtn');
 const transcript = document.getElementById('transcript');
 const fileUpload = document.getElementById('fileUpload');
 const fileName = document.getElementById('fileName');
 const jobLink = document.getElementById('jobLink');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const generateReportOverlay = document.getElementById('generateReportOverlay');
+const generatedReport = document.getElementById('generatedReport');
 
 // Set up
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -50,7 +54,7 @@ userForm.addEventListener('submit', async (event) => {
         const data = await response.json();
         threadId = data.threadId
 
-        initMessage = `Hi, my name is ${userName} and you need to conduct a job interview with me now.`;
+        initMessage = message.intro + userName + message.jobInterview;
 
     } catch (error) {
         console.error('Error fetching thread:', error);
@@ -79,11 +83,12 @@ userForm.addEventListener('submit', async (event) => {
             console.error('Network error:', err);
         }
 
-        initMessage = initMessage.concat("Understand my uploaded resume and use it as a reference.")
+        initMessage = initMessage.concat(message.understandResume);
     }
     //TODO: job description to openai 
 
-    await sendMessage(initMessage);
+    await sendMessageAndPlayAudioResponse(initMessage, threadId, fileId);
+    startInterviewTimer();
 });
 
 
@@ -106,7 +111,7 @@ recognition.onresult = async function(event) {
     if (result != "") {
         transcript.value = `${result}\n\n` + transcript.value;
         recognition.stop();
-        await sendMessage(result);
+        await sendMessageAndPlayAudioResponse(result, threadId, null);
     }
 }
 
@@ -122,19 +127,17 @@ if ('speechSynthesis' in window) {
         console.log('Text-to-speech not supported.');
 }
 
-async function sendMessage(message) {
+// initial message, send message, threadid, fileid (loading and voice)
+// conversational message, send only message, thread (loading and voice)
+// generate report message, send message, thread (loading and show of report)
+
+async function sendMessageAndPlayAudioResponse(message, threadId, fileId) {
     showLoading();
     userForm.style.display = 'none';
     interviewSection.style.display = 'block'; 
 
     console.log(JSON.stringify({ message, threadId, fileId }))
-    const response = await fetch(`${API_BASE_URL}/assistant/message`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ message, threadId, fileId })
-    });
+    const response = await sendMessageToAssistant(message, threadId, fileId)
 
     hideLoading();
     userForm.style.display = 'none';
@@ -148,29 +151,6 @@ async function sendMessage(message) {
         await handleSpeechAndRecognition(result.response);
     }
 }
-/*
-function speak(message) {
-    if (synthesis && message) { //TODO different speech synthesis
-
-        return new Promise((resolve) => {
-            const utterance = new SpeechSynthesisUtterance(message);
-    
-            // Event triggered when speech synthesis is finished
-            utterance.onend = () => {
-                console.log("Speech synthesis finished");
-                resolve(); // Resolve the promise
-            };
-    
-            // Handle any potential errors
-            utterance.onerror = (event) => {
-                console.error("Speech synthesis error:", event.error);
-                resolve(); // Still resolve to prevent blocking
-            };
-    
-            synthesis.speak(utterance);
-        });
-    }
-} */
 
 async function playAndWaitForAudio(audioUrl) {
     return new Promise((resolve) => {
@@ -200,6 +180,44 @@ endBtn.onclick = function() {
         window.location.reload();
     }
 };
+
+generateBtn.onclick = async function() {
+    generateReport();
+};
+
+async function generateReport() {
+    recognition.stop();
+    showLoading();
+    userForm.style.display = 'none';
+    interviewSection.style.display = 'block'; 
+    const response = await sendMessageToAssistant(message.generateReport, threadId, null);
+    if (!response.ok) {
+        generatedReport.value = 'Oops! There seems to have gone something wrong! Could not connect to your assistant';
+    } else {
+        const result = await response.json();
+        generatedReport.value = result.response;
+    }
+    hideLoading();
+    userForm.style.display = 'none';
+    interviewSection.style.display = 'block';
+    generateReportOverlay.style.display = 'flex';
+}
+
+
+
+async function sendMessageToAssistant(message, threadId, fileId) {
+
+    const response = await fetch(`${API_BASE_URL}/assistant/message`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ message, threadId, fileId })
+    });
+
+    return response;
+
+}
 
 fileUpload.addEventListener('change', (event) => {
     const eventFile = event.target.files[0];
@@ -247,5 +265,14 @@ async function synthesizeAndPlayAudio(text) {
     } catch (error) {
         console.error("Error during synthesis or playback:", error);
     }
+}
+
+function startInterviewTimer() {
+
+    // TODO: refine this
+    // able to generate report after 15 min (?)
+    setTimeout(() => {
+        generateBtn.style.display = 'inline-block'
+    }, 900000); // 900,000 milliseconds = 15 minutes
 }
 

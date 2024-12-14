@@ -28,16 +28,27 @@
 
         <div class="interview-section" id="interviewSection" style="display: none;">
             <div class="instructions">
-                <p>Press "Record" to start talking to your assistant.</p>
-                <p>Press "Stop" to stop recording. All responses will be transcribed below.</p>
+                <p>Press "Stop" to stop any recording. Press "Start" to start recording.</p>
+                <p>Generate a report about your interview to see how you are doing.</p> 
+                <p>All responses between you and the assistant will be transcribed below.</p>
             </div>
             <div class="transcript-window">
                 <textarea id="transcript" readonly></textarea>
             </div>
             <div class="controls">
                 <button id="startBtn" class="btn btn-success">Record</button>
-                <button id="stopBtn" class="btn btn-danger" disabled>Stop</button>
+                <button id="stopBtn" class="btn btn-danger">Stop</button>
+                <button id="generateReportBtn" class="btn btn-primary">Generate Report</button>
                 <button id="endBtn" class="btn btn-warning">End Interview</button>
+            </div>
+        </div>
+        <div id="generateReportOverlay" class="generate-report-overlay">
+            <div class="report-content">
+                <h2>Mock Interview Report</h2>
+                <div class="transcript-window">
+                    <textarea id="generatedReport" readonly></textarea>
+                </div>
+                <button id="acknowledgeReportBtn" class="btn btn-primary">Exit Interview</button>
             </div>
         </div>
     </div>

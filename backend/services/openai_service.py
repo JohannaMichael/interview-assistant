@@ -5,7 +5,7 @@ import asyncio
 from fastapi import UploadFile
 import io
 
-load_dotenv("../.env")
+load_dotenv("./.env")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 ASSISTANT_ID = os.getenv("ASSISTANT_ID")
 

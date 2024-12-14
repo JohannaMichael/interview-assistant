@@ -1,6 +1,6 @@
-from models.text_to_speech_request_model import TextToSpeechRequest
+from backend.models.text_to_speech_request_model import TextToSpeechRequest
 from fastapi import APIRouter, HTTPException
-from services.elevenlabs_service import text_to_speech_stream
+from backend.services.elevenlabs_service import text_to_speech_stream
 from fastapi.responses import StreamingResponse
 
 text_speech_router = APIRouter()

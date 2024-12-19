@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException, File, UploadFile, BackgroundTasks
-from backend.models.message_request_model import MessageRequest
-from backend.services.openai_service import (
+from models.message_request_model import MessageRequest
+from services.openai_service import (
     create_thread,
     add_message,
     run_assistant,
     check_status,
     upload_file_to_openai
 )
-from backend.services.file_service import validate_file
+from services.file_service import validate_file
 
 assistant_router = APIRouter()
 

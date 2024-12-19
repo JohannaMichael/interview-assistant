@@ -2,9 +2,10 @@ import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from backend.routes.assistant_routes import assistant_router
-from backend.routes.text_speech_routes import text_speech_router
+from routes.assistant_routes import assistant_router
+from routes.text_speech_routes import text_speech_router
 
+load_dotenv(".env")
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 
 # Initialize FastAPI

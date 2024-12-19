@@ -1,5 +1,8 @@
-.venv/
+venv/
 .vscode/
 .env
 config.js
 .DS_Store
+__pycache__
+.dockerignore
+docker-compose.override.yml

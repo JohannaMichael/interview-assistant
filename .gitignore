@@ -1,7 +1,6 @@
 venv/
 .vscode/
 .env
-config.js
 .DS_Store
 __pycache__
 .dockerignore

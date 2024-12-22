@@ -2,7 +2,7 @@
 
 AI Assistant helping you train for job interviews.
 
-## Setup
+## Setup (without Docker):
 
 Clone this repository:
 
@@ -11,9 +11,10 @@ git clone https://github.com/JohannaMichael/interview-assistant.git
 cd interview-assistant
 ```
 
-Create a virtual environment. Activate it:
+Create a virtual environment for backend. Activate it:
 
 ```
+cd backend
 python3 -m venv venv
 source venv/bin/activate
 ```
@@ -32,23 +33,31 @@ Set up an Account and API keys in Elevenlabs to get high quality text-to-speech 
 Running the backend server: 
 
 ```
-uvicorn backend.app:app --reload
+uvicorn app:app --reload
 ```
 
-The fastapi app will run on http://127.0.0.1:8000 
-Place this url in a config.js file in the frontend folder. The content of the file should look like this: 
+The fastapi app will run on http://localhost:8000 
 
-```
-const config = {
-    API_BASE_URL: 'http://localhost:8000',
-};
-
-export default config;
-```
-
-Finally, for the frontend, I run a Live Server in VSCode. You have to place the url (for me it is this: http://127.0.0.1:5500) in the .env file as well (as shown in .env.example)
+Finally, for the frontend, I run a Live Server in VSCode. You have to place the url (for me it is this: http://localhost:5500) in the .env file as well (as shown in .env.example)
 
 Run both frontend and backend to get the running application.
+
+## Set up (with Docker):
+
+Clone this repository as described above. 
+
+```
+git clone https://github.com/JohannaMichael/interview-assistant.git
+cd interview-assistant
+```
+Set up the api keys and assistant id for openai and elevenlabs as described above. 
+
+Then run the docker command: 
+
+```
+docker compose up --build
+```
+
 
 
 

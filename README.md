@@ -25,8 +25,9 @@ Install the required dependencies:
 pip install -r ./requirements.txt
 ```
 
+Set up API Keys: 
 
-Set up API Keys in OpenAI and set up an Assistant with an AssistantID, place both in an .env file (see env.example). You have to give the Assistant system instructions. Write something like this: "You are a Job Interview Trainer and Assistant. You need to train the user for job interviews by asking them questions about their resume or past projects." Activate File Search. Currently using gpt-4o-mini-2024-07-18 model. 
+Set up API Keys in OpenAI and set up an Assistant with an AssistantID, place both in an .env file WITHIN backend folder (see env.example). You have to give the Assistant system instructions. Write something like this: "You are a Job Interview Trainer and Assistant. You need to train the user for job interviews by asking them questions about their resume or past projects." Activate File Search. Currently using gpt-4o-mini-2024-07-18 model. 
 
 Set up an Account and API keys in Elevenlabs to get high quality text-to-speech voices. They have a free plan initially. Place the key in your .env file as well.
 

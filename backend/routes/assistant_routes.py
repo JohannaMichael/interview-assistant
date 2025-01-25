@@ -1,4 +1,5 @@
-from fastapi import APIRouter, HTTPException, File, UploadFile, BackgroundTasks
+from fastapi import APIRouter, HTTPException, File, UploadFile, BackgroundTasks, Request
+from rate_limiter import limiter
 from models.message_request_model import MessageRequest
 from services.openai_service import (
     create_thread,
@@ -12,7 +13,8 @@ from services.file_service import validate_file
 assistant_router = APIRouter()
 
 @assistant_router.get("/thread")
-async def thread_route():
+@limiter.limit("10/minute")
+async def thread_route(request: Request):
     # Endpoint to create a new thread
     threadId = await create_thread()
     return {
@@ -20,14 +22,16 @@ async def thread_route():
     }
 
 @assistant_router.post("/message")
-async def message_route(request: MessageRequest, background_tasks: BackgroundTasks):
+@limiter.limit("10/second")
+@limiter.limit("100/minute")
+async def message_route(request: Request, message_request: MessageRequest, background_tasks: BackgroundTasks):
     """
     Endpoint to add a message to a thread and run the assistant.
     Uses a background task to poll for the assistant's response.
     """
-    thread_id = request.threadId
-    message = request.message
-    file_id = request.fileId
+    thread_id = message_request.threadId
+    message = message_request.message
+    file_id = message_request.fileId
 
     if not thread_id or not message:
         raise HTTPException(status_code=400, detail="Invalid input")
@@ -53,7 +57,8 @@ async def message_route(request: MessageRequest, background_tasks: BackgroundTas
     }
 
 @assistant_router.post("/upload-file")
-async def upload_file(file: UploadFile = File(...)):
+@limiter.limit("2/minute")
+async def upload_file(request: Request, file: UploadFile = File(...)):
     """
     Endpoint to upload a PDF file.
     """

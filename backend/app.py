@@ -1,23 +1,29 @@
 import os
 from dotenv import load_dotenv
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from routes.assistant_routes import assistant_router
-from routes.text_speech_routes import text_speech_router
+from rate_limiter import limiter, rate_limit_error_handler
+from slowapi.errors import RateLimitExceeded
 
 load_dotenv(".env")
 FRONTEND_BASE_URL = os.getenv("FRONTEND_BASE_URL")
 
-# Initialize FastAPI
+# Initializing FastAPI
 app = FastAPI()
+
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, rate_limit_error_handler)
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[FRONTEND_BASE_URL], 
     allow_credentials=True,
-    allow_methods=["*"],  # Allow all HTTP methods
-    allow_headers=["*"],  # Allow all headers
+    allow_methods=["*"], 
+    allow_headers=["*"],
 )
+
+from routes.assistant_routes import assistant_router
+from routes.text_speech_routes import text_speech_router
 
 app.include_router(assistant_router, prefix="/assistant")
 app.include_router(text_speech_router, prefix="/synthesis")

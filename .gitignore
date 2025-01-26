@@ -5,3 +5,7 @@ venv/
 __pycache__
 .dockerignore
 docker-compose.override.yml
+node_modules/
+dist/
+.vite/
+package-lock.json

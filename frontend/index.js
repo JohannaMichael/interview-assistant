@@ -15,6 +15,8 @@ const jobLink = document.getElementById('jobLink');
 const loadingOverlay = document.getElementById('loadingOverlay');
 const generateReportOverlay = document.getElementById('generateReportOverlay');
 const generatedReport = document.getElementById('generatedReport');
+const themeToggle = document.getElementById('themeToggle');
+const themeStylesheet = document.getElementById('theme-stylesheet');
 
 // Set up
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -23,6 +25,9 @@ const SpeechRecognitionEvent = window.SpeechRecognitionEvent || window.webkitSpe
 
 const recognition = new SpeechRecognition();
 const speechRecognitionList = new SpeechGrammarList();
+
+const savedTheme = localStorage.getItem('theme') || 'light';
+updateTheme(savedTheme);
 
 let threadId = null;
 let file = null;
@@ -33,6 +38,22 @@ recognition.continuous = true;
 recognition.lang = 'en-US';
 recognition.interimResults = false;
 recognition.maxAlternatives = 1;
+
+themeToggle.addEventListener('click', () => {
+    const newTheme = themeStylesheet.getAttribute('href') === 'light_theme.css' ? 'dark' : 'light';
+    updateTheme(newTheme);
+});
+
+function updateTheme(theme) {
+    if (theme === 'dark') {
+        themeToggle.textContent = '☀️Light';
+        themeStylesheet.setAttribute('href', 'dark_theme.css');
+    } else {
+        themeToggle.textContent = '🌙 Dark';
+        themeStylesheet.setAttribute('href', 'light_theme.css');
+    }
+    localStorage.setItem('theme', theme);
+}
 
 userForm.addEventListener('submit', async (event) => {
     event.preventDefault();

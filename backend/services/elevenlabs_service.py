@@ -2,7 +2,6 @@ import os
 from elevenlabs import VoiceSettings
 from elevenlabs.client import ElevenLabs
 from io import BytesIO
-import uuid
 
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
 client = ElevenLabs(
@@ -10,7 +9,6 @@ client = ElevenLabs(
 )
 
 def text_to_speech_stream(text):
-    # Perform the text-to-speech conversion
     response = client.text_to_speech.convert(
         voice_id="9BWtsMINqrJLrRacOk9x", # Aria voice
         output_format="mp3_22050_32",
@@ -24,10 +22,8 @@ def text_to_speech_stream(text):
         ),
     )
 
-    # Create a BytesIO object to hold the audio data in memory
     audio_stream = BytesIO()
 
-    # Write each chunk of audio data to the stream
     for chunk in response:
         if chunk:
             audio_stream.write(chunk)
@@ -35,6 +31,5 @@ def text_to_speech_stream(text):
     # Reset stream position to the beginning
     audio_stream.seek(0)
 
-    # Return the stream for further use
     return audio_stream
 

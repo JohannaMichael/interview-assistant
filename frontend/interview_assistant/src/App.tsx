@@ -12,14 +12,14 @@ function App() {
 
 
     return (
-        <div className="App">
+        <>
             <ThemeToggleButton />
             <div className="background-animation"></div>
-            <div id="loadingOverlay" className="loading-overlay">
-                <div className="loader"></div>
-            </div>
             <div className="container">
                 <h1>Interview Assistant</h1>
+                <div id="loadingOverlay" className="loading-overlay">
+                  <div className="loader"></div>
+                </div>
                   {!isInterviewStarted ? (
               <InterviewUserForm 
                 setIsInterviewStarted={setIsInterviewStarted} 
@@ -31,13 +31,12 @@ function App() {
                   <Interview 
                     threadId={threadId} 
                     transcript={transcript} 
-                    setTranscript={setTranscript} 
-                  />
+                    setTranscript={setTranscript} />
                   <InterviewReport transcript={transcript} />
-              </>
+                </>
             )}
             </div>
-        </div>
+        </>
     );
 }
 

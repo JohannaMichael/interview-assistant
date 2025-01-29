@@ -5,7 +5,7 @@ function ThemeToggleButton() {
 
     useEffect(() => {
         const themeStylesheet = document.getElementById('theme-stylesheet') as HTMLLinkElement | null;
-        themeStylesheet?.setAttribute('href', theme === 'light' ? 'light_theme.css' : 'dark_theme.css');
+        themeStylesheet?.setAttribute('href', theme === 'light' ? './src/styles/light_theme.css' : './src/styles/dark_theme.css');
         localStorage.setItem('theme', theme);
     }, [theme]);
 

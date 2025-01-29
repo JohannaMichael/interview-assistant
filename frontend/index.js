@@ -206,6 +206,8 @@ generateBtn.onclick = async function() {
     generateReport();
 };
 
+// Needs to move to Generate Report Component:
+
 async function generateReport() {
     recognition.stop();
     showLoading();

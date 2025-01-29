@@ -1,4 +1,37 @@
-function Interview() {
+import { useState } from 'react';
+//import { sendMessage } from '../assistantApiService';
+
+interface Props {
+  threadId: string | null;
+  transcript: string;
+  setTranscript: (value: string) => void;
+}
+
+function Interview({ threadId, transcript, setTranscript }: Props) {
+
+    const [isRecording, setIsRecording] = useState(false);
+
+    const startRecording = () => {
+        setIsRecording(true);
+        // Start recording logic
+    };
+
+    const stopRecording = () => {
+        setIsRecording(false);
+        // Stop recording logic
+    };
+
+    const handleSendMessage = async (message: string) => {
+        if (!threadId) return;
+        try {
+            const response = await sendMessage(message, threadId, null);
+            setTranscript(response.response + '\n' + transcript);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+    };
+
+
     return (
         <div className="interview-section" id="interviewSection" style={{ display: 'none' }}>
             <div className="instructions">

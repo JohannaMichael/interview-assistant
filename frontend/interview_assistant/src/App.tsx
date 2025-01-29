@@ -2,14 +2,18 @@ import ThemeToggleButton from './components/ThemeToggleButton';
 import InterviewUserForm from './components/InterviewUserForm';
 import Interview from './components/Interview';
 import InterviewReport from './components/InterviewReport';
-import {useState, useEffect} from 'react';
+import {LoadingOverlay} from './components/LoadingOverlay';
+import {useState} from 'react';
 
 function App() {
   const [isInterviewStarted, setIsInterviewStarted] = useState(false);
   const [transcript, setTranscript] = useState<string>('');
-  const [threadId, setThreadId] = useState<string | null>(null);
+  const [threadId, setThreadId] = useState<string>('');
   const [file, setFile] = useState<File | null>(null);
-
+  const [fileId, setFileId] = useState<string | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>('');
+  const [currentResponse, setCurrentResponse] = useState<string>('');
 
     return (
         <>
@@ -17,22 +21,25 @@ function App() {
             <div className="background-animation"></div>
             <div className="container">
                 <h1>Interview Assistant</h1>
-                <div id="loadingOverlay" className="loading-overlay">
-                  <div className="loader"></div>
-                </div>
+                {loading && <LoadingOverlay />}
                   {!isInterviewStarted ? (
               <InterviewUserForm 
                 setIsInterviewStarted={setIsInterviewStarted} 
+                threadId={threadId}
                 setThreadId={setThreadId}
+                fileId={fileId}
                 file={file}
                 setFile={setFile}
+                setLoading={setLoading}
+                setMessage={setMessage}
+                setFileId={setFileId}
+                setCurrentResponse={setCurrentResponse}
               />) : (
                 <>
                   <Interview 
                     threadId={threadId} 
                     transcript={transcript} 
                     setTranscript={setTranscript} />
-                  <InterviewReport transcript={transcript} />
                 </>
             )}
             </div>

@@ -258,7 +258,7 @@ textarea:focus {
     align-items: center;
     z-index: 1000;
     border-radius: 15px;
-    display: none;
+    /*display: none;*/
 }
 
 .loader {

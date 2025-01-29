@@ -1,4 +1,8 @@
-function InterviewReport() {
+interface Props {
+    transcript: string;
+  }
+
+function InterviewReport(transcript) {
     return (
         <div id="generateReportOverlay" className="generate-report-overlay">
             <div className="report-content">

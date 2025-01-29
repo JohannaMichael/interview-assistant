@@ -1,18 +1,73 @@
 import {useState, useEffect} from 'react';
+import { createThread, uploadFile, sendMessage } from '../assistantApiService';
+import {assistantMessage} from '../../messages';
 
 interface Props {
     setIsInterviewStarted: (value: boolean) => void;
-    setThreadId: (value: string | null) => void;
+    threadId: string;
+    setThreadId: (value: string) => void;
+    fileId : string | null;
     file: File | null;
     setFile: (value: File) => void;
+    setLoading: (value: boolean) => void;
+    setMessage: (value: string) => void;
+    setFileId: (value: string | null) => void;
+    setCurrentResponse: (value: string) => void;
   }
 
-function InterviewUserForm({ setIsInterviewStarted, setThreadId, file, setFile }: Props) {
+function InterviewUserForm({ setIsInterviewStarted, threadId, setThreadId, fileId, file, setFile, setLoading, setMessage, setFileId, setCurrentResponse}: Props) {
     const [fileName, setFileName] = useState<string>('No file selected');
-    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    const [userName, setUserName] = useState<string>('');
+
+    const handleUserNameChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        setUserName(event.target.value);
+    };
+    
+    
+    const handleSubmitAndStartInterview = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        // Handle form submission logic
-        console.log('Form submitted');
+        setLoading(true);
+        let message = '';
+        threadId = '';
+        fileId = null;
+
+        //create thread
+        try {
+            const response = await createThread();
+            setThreadId(response.threadId);
+            threadId = response.threadId;
+            message = assistantMessage.intro + userName + assistantMessage.jobInterview;
+        } catch (error) {
+            console.error('Failed to fetch thread:', error);
+        }
+
+        //upload file
+        if (file) {
+
+            try {
+                const response = await uploadFile(file);
+                setFileId(response.file_id); //TODO: Refactor to one or the other fileId or file_id)
+                fileId = response.file_id;
+                message = assistantMessage.intro + userName + assistantMessage.jobInterview;
+            } catch (error) {
+                console.error('Failed to fetch thread:', error);
+            }
+
+            message = message.concat(assistantMessage.understandResume);
+            setMessage(message)
+        }
+
+        //send message with created thread and file
+        try {
+            const response = await sendMessage(message, threadId, fileId);
+            console.log(response)
+            setCurrentResponse(response.response);
+        } catch (error) {
+            console.error('Error sending message:', error);
+        }
+
+        setIsInterviewStarted(true);
+
     };
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -23,11 +78,17 @@ function InterviewUserForm({ setIsInterviewStarted, setThreadId, file, setFile }
         } else {
           setFileName('No file selected');
         }
-      };
+    };
 
     return (
-        <form id="userForm" className="user-form" onSubmit={handleSubmit}>
-            <input type="text" id="userName" placeholder="Enter Your Name" required />
+        <form id="userForm" className="user-form" onSubmit={handleSubmitAndStartInterview}>
+            <input 
+                type="text" 
+                id="userName" 
+                placeholder="Enter Your Name" 
+                value={userName} 
+                onChange={handleUserNameChange} 
+                required/>
             <div className="file-input-wrapper">
                 <input type="file" id="fileUpload" className="file-input" accept=".pdf" onChange={handleFileChange}/>
                 <label htmlFor="fileUpload" className="file-label">Upload Resume</label>
@@ -49,22 +110,6 @@ export default InterviewUserForm;
 
 
 /*
-fileUpload.addEventListener('change', (event) => {
-    const eventFile = event.target.files[0];
-    if (eventFile) {
-        fileName.textContent = eventFile.name;
-        file = eventFile;
-    } else {
-        fileName.textContent = "No file selected";
-    }
-});
-
-
-
-
-
-
-
 
 
 userForm.addEventListener('submit', async (event) => {

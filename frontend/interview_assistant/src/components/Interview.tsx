@@ -1,5 +1,5 @@
 import { useState } from 'react';
-//import { sendMessage } from '../assistantApiService';
+import { sendMessage } from '../assistantApiService';
 
 interface Props {
   threadId: string | null;

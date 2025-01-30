@@ -15,11 +15,17 @@
     <div class="container">
         <h1>Interviewing Assistant</h1>
         <form id="userForm" class="user-form">
+            <div class="instructions">
+                <p>Enter your name, upload your resume (optional) and start practicing your interview skills.</p>
+                <p>After 15 min you can generate a report on how well you did.</p> 
+                <p>All responses between you and the assistant will be transcribed.</p>
+                <p>Practice as much and as long as you like.</p>
+            </div>
             <input type="text" id="userName" placeholder="Enter Your Name" required>
             <div class="file-input-wrapper">
                 <input type="file" id="fileUpload" class="file-input" accept=".pdf">
                 <label for="fileUpload" class="file-label">Upload Resume</label>
-                <span id="fileName" class="file-name"></span>
+                <span id="fileName" class="file-name">No file selected</span>
             </div>
             <input type="text" id="jobLink" class="link-input" placeholder="🔗 Job Posting Link - Coming Soon!" disabled>
             <button type="submit" class="btn btn-primary">Start Interview</button>
@@ -32,7 +38,8 @@
         <div class="interview-section" id="interviewSection" style="display: none;">
             <div class="instructions">
                 <p>Press "Stop" to stop any recording. Press "Start" to start recording.</p>
-                <p>Generate a report about your interview to see how you are doing.</p> 
+                <p>End Interview whenever you like.</p>
+                <p>You will be able to generate a report after 15 min.</p> 
                 <p>All responses between you and the assistant will be transcribed below.</p>
             </div>
             <div class="transcript-window">
